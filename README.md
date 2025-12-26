@@ -1,8 +1,8 @@
-# Welcome to your Expo app 👋
+# Money Dey – Auth Flow (Expo + Firebase)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+This project includes beautiful Login and Signup screens with a soft purple theme, built on Expo Router and Firebase Auth. After authentication, users go straight to the Dashboard (no OTP step).
 
-## Get started
+## Quick start
 
 1. Install dependencies
 
@@ -10,41 +10,49 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
    npm install
    ```
 
-2. Start the app
+2. Configure Firebase (Email/Password)
+
+   Create a Firebase project and enable Authentication providers:
+   - Email/Password: Enabled
+   - Phone: Enabled (for OTP via SMS)
+   - Optionally Google/Apple if you plan to support social login
+
+   Add your config in environment variables (recommended) or inline in `lib/firebase.ts`.
+
+   Using Expo env vars (app.json or .env with `EXPO_PUBLIC_`):
+   - EXPO_PUBLIC_FIREBASE_API_KEY
+   - EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN
+   - EXPO_PUBLIC_FIREBASE_PROJECT_ID
+   - EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET
+   - EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+   - EXPO_PUBLIC_FIREBASE_APP_ID
+
+   Phone Auth notes:
+   - On iOS and Android, follow Firebase setup for phone auth (APNs for iOS, SHA keys + SafetyNet/Play Integrity for Android).
+   - In development with Expo Go, use test phone numbers from Firebase console.
+
+3. Start the app
 
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+## Navigation
+- index decides between onboarding and auth
+- onboarding introduces the app and routes to /auth/login
+- /auth/login: email/password sign-in, social buttons placeholders
+- /auth/signup: name, email, phone, password; creates user and sends you to OTP
+- /auth/otp: 6-digit code UI, scaffold for Firebase Phone Auth; continues to /dashboard
+- /dashboard: placeholder home after authentication
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Theming
+Colors are centralized in `constants/colors.js` with a purple-first palette and soft UI styles shared across auth pages.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Where to add real OTP logic
+See `app/auth/otp.tsx`. The UI is wired; integrate Firebase Phone Auth by:
+- Starting verification to obtain `verificationId`
+- Creating credential via `PhoneAuthProvider.credential(verificationId, code)`
+- Signing in with `signInWithCredential`
 
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Assets and imagery
+Hero images are remote and defined in `constants/images.js`. Replace with brand imagery when available.
