@@ -397,6 +397,7 @@ export default function Recommendations() {
 
             if (!res.ok) {
                 const errText = await res.text();
+                console.log('AI response error', errText);
                 throw new Error(`AI request failed (${res.status}): ${errText || 'no response body'}`);
             }
 
@@ -404,6 +405,7 @@ export default function Recommendations() {
             const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
             return text || 'I suggest setting a simple budget and targeting 20% savings.';
         } catch (e: any) {
+            console.log('AI call error', e);
             Toast.show({ type: 'error', text1: 'AI unavailable', text2: e?.message || 'Could not get a response. Try again shortly.' });
             return null;
         }

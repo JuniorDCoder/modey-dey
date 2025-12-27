@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
   textWrap: { padding: 24, paddingBottom: 120, alignItems: 'center' },
   title: { color: C.TEXT_ON_PURPLE, fontSize: 28, fontWeight: '700', textAlign: 'center', marginBottom: 8 },
   desc: { color: '#EFEAFE', fontSize: 16, textAlign: 'center' },
-  dots: { position: 'absolute', bottom: 80, left: 0, right: 0, flexDirection: 'row', justifyContent: 'center', gap: 8 },
+  dots: { position: 'absolute', bottom: 90, left: 0, right: 0, flexDirection: 'row', justifyContent: 'center', gap: 8 },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.5)', marginHorizontal: 4 },
   dotActive: { backgroundColor: '#fff', width: 18 },
   cta: { position: 'absolute', bottom: 24, left: 24, right: 24, backgroundColor: C.CARD_LIGHT, paddingVertical: 14, borderRadius: 12, alignItems: 'center', shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 8, shadowOffset: { width: 0, height: 4 } },

@@ -1,5 +1,4 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import * as Notifications from 'expo-notifications';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
@@ -10,39 +9,51 @@ import Toast from 'react-native-toast-message';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { androidExpoGoBlockedPush, requestNotificationPermissions } from '@/lib/notifications';
 
-// Configure how notifications are handled when app is in foreground
-Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-        shouldShowAlert: true,
-        shouldPlaySound: true,
-        shouldSetBadge: false,
-        shouldShowBanner: true,
-        shouldShowList: true,
-    }),
-});
+// Configure notifications only if available (SDK 53+ requires development build for remote notifications)
+let Notifications: any;
+try {
+    Notifications = require('expo-notifications');
+    Notifications.setNotificationHandler({
+        handleNotification: async () => ({
+            shouldShowAlert: true,
+            shouldPlaySound: true,
+            shouldSetBadge: false,
+            shouldShowBanner: true,
+            shouldShowList: true,
+        }),
+    });
+} catch (e) {
+    console.warn('Notifications not available in this environment');
+}
 
 export default function RootLayout() {
     const colorScheme = useColorScheme();
 
     useEffect(() => {
         const setupNotifications = async () => {
-            const granted = await requestNotificationPermissions();
+            try {
+                const granted = await requestNotificationPermissions();
 
-            if (androidExpoGoBlockedPush()) {
-                Toast.show({
-                    type: 'info',
-                    text1: 'Build required for push',
-                    text2: 'Expo Go on Android cannot receive remote push. Use a development build; local notifications still work.',
-                });
-                return;
-            }
+                if (androidExpoGoBlockedPush()) {
+                    Toast.show({
+                        type: 'info',
+                        text1: 'Build required for push',
+                        text2: 'Expo Go on Android cannot receive remote push. Use a development build; local notifications still work.',
+                    });
+                    return;
+                }
 
-            if (!granted) {
-                Toast.show({ type: 'info', text1: 'Notifications off', text2: 'Enable notifications to receive alerts.' });
+                if (!granted) {
+                    Toast.show({ type: 'info', text1: 'Notifications off', text2: 'Enable notifications to receive alerts.' });
+                }
+            } catch (e) {
+                console.warn('Failed to setup notifications:', e);
             }
         };
 
-        setupNotifications();
+        if (Notifications) {
+            setupNotifications();
+        }
     }, []);
 
     return (

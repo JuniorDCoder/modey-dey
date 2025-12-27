@@ -76,3 +76,16 @@ export interface Repayment {
   createdAt?: any; // Firestore Timestamp or ISO
   updatedAt?: any; // Firestore Timestamp or ISO
 }
+
+export interface AppNotification {
+  id: string;
+  userId: string;
+  title: string;
+  body: string;
+  type?: 'system' | 'debt' | 'recommendation' | string;
+  read?: boolean;
+  relatedId?: string;
+  scheduledFor?: string; // ISO string for reminders
+  createdAt?: any; // Firestore Timestamp or ISO
+  readAt?: any; // Firestore Timestamp or ISO
+}

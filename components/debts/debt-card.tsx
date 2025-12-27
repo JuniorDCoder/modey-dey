@@ -19,6 +19,7 @@ export default function DebtCard({ debt, onRemind, onSettle }: Props) {
     debt.status === 'paid' ? '#10B981' : 
     debt.status === 'partial' ? '#F59E0B' : 
     '#EF4444';
+  const isPaid = (debt.status === 'paid') || (Number(remainingAmount) <= 0);
 
   return (
     <View style={styles.card}>
@@ -57,12 +58,21 @@ export default function DebtCard({ debt, onRemind, onSettle }: Props) {
             </>
           )}
         </View>
-        <Pressable style={styles.remindBtn} onPress={() => onRemind && onRemind(debt)}>
-          <Text style={styles.remindText}>Remind</Text>
-        </Pressable>
-        <Pressable style={styles.settleBtn} onPress={() => onSettle && onSettle(debt)}>
-          <Text style={styles.settleText}>Settle</Text>
-        </Pressable>
+
+        {isPaid ? (
+          <View style={styles.settledPill}>
+            <Text style={styles.settledText}>Settled ✓</Text>
+          </View>
+        ) : (
+          <>
+            <Pressable style={styles.remindBtn} onPress={() => onRemind && onRemind(debt)}>
+              <Text style={styles.remindText}>Remind</Text>
+            </Pressable>
+            <Pressable style={styles.settleBtn} onPress={() => onSettle && onSettle(debt)}>
+              <Text style={styles.settleText}>Settle</Text>
+            </Pressable>
+          </>
+        )}
       </View>
     </View>
   );
@@ -100,4 +110,6 @@ const styles = StyleSheet.create({
   remindText: { color: C.PRIMARY_PURPLE, fontWeight: '700' },
   settleBtn: { backgroundColor: C.PRIMARY_PURPLE, paddingVertical: 6, paddingHorizontal: 12, borderRadius: 10 },
   settleText: { color: C.TEXT_ON_PURPLE, fontWeight: '800' },
+  settledPill: { marginTop: 4, backgroundColor: '#ECFDF3', paddingVertical: 6, paddingHorizontal: 12, borderRadius: 999, borderWidth: 1, borderColor: '#D1FAE5' },
+  settledText: { color: '#15803D', fontWeight: '800' },
 });

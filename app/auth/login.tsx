@@ -20,7 +20,6 @@ import {
     TextInput,
     View
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 
 const { height } = Dimensions.get('window');
@@ -68,7 +67,7 @@ export default function Login() {
     };
 
     return (
-        <SafeAreaView style={styles.safeArea}>
+        <View style={styles.safeArea}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={styles.keyboardView}
@@ -204,7 +203,7 @@ export default function Login() {
                 </ScrollView>
             </KeyboardAvoidingView>
             <StatusBar hidden={true} />
-        </SafeAreaView>
+        </View>
     );
 }
 

@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, View, Text, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
 import * as C from '@/constants/colors';
 import { auth } from '@/lib/firebase';
+import { useRouter } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
 import { onAuthStateChanged } from 'firebase/auth';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 export default function Index() {
   const router = useRouter();

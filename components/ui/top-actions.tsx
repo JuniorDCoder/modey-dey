@@ -1,9 +1,11 @@
 import * as C from '@/constants/colors';
+import { auth, db } from '@/lib/firebase';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { Link, usePathname } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 const actions = [
   { key: 'notifications', icon: (active: boolean) => <Ionicons name="notifications" size={20} color={active ? C.TEXT_ON_PURPLE : C.TEXT_PRIMARY} />, href: '/notifications' },
@@ -13,6 +15,25 @@ const actions = [
 
 export default function TopActions() {
   const pathname = usePathname();
+  const [unread, setUnread] = useState(0);
+
+  useEffect(() => {
+    const uid = auth.currentUser?.uid;
+    if (!uid) {
+      setUnread(0);
+      return;
+    }
+
+    const q = query(collection(db, 'notifications'), where('userId', '==', uid), where('read', '==', false));
+    const unsub = onSnapshot(q, (snap) => {
+      setUnread(snap.size);
+    }, (err) => {
+      console.log('TopActions unread error', err);
+      setUnread(0);
+    });
+
+    return () => unsub();
+  }, [pathname]);
 
   return (
     <View style={styles.container} pointerEvents="box-none">
@@ -22,7 +43,14 @@ export default function TopActions() {
           return (
             <Link key={action.key} href={action.href as any} asChild>
               <Pressable style={[styles.btn, active && styles.activeBtn]}>
-                {action.icon(active)}
+                <View style={styles.iconWrap}>
+                  {action.icon(active)}
+                  {action.key === 'notifications' && unread > 0 && (
+                    <View style={styles.badge}>
+                      <Text style={styles.badgeText}>{unread > 99 ? '99+' : unread}</Text>
+                    </View>
+                  )}
+                </View>
               </Pressable>
             </Link>
           );
@@ -63,7 +91,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  iconWrap: { position: 'relative', alignItems: 'center', justifyContent: 'center' },
   activeBtn: {
     backgroundColor: C.PRIMARY_PURPLE,
   },
+  badge: {
+    position: 'absolute',
+    top: -6,
+    right: -10,
+    minWidth: 18,
+    paddingHorizontal: 4,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#EF4444',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeText: { color: '#fff', fontSize: 10, fontWeight: '800' },
 });

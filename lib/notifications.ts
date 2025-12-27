@@ -86,11 +86,11 @@ export async function scheduleDebtReminder(
     title: string,
     body: string,
     date: Date
-) {
+): Promise<string> {
     // Convert Date to trigger format
     const triggerDate = new Date(date);
 
-    await Notifications.scheduleNotificationAsync({
+    const id = await Notifications.scheduleNotificationAsync({
         content: {
             title,
             body,
@@ -102,6 +102,8 @@ export async function scheduleDebtReminder(
             channelId: 'default',
         },
     });
+
+    return id;
 }
 
 // Cancel all scheduled notifications

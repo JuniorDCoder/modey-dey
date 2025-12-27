@@ -1,4 +1,4 @@
-import IncomeExpenseChart from '@/components/charts/income-expense-chart';
+import SummaryPieChart from '@/components/charts/summary-pie-chart';
 import BottomTabs from '@/components/ui/bottom-tabs';
 import Shimmer from '@/components/ui/shimmer';
 import SummaryCard from '@/components/ui/summary-card';
@@ -7,6 +7,7 @@ import * as C from '@/constants/colors';
 import { useTransactions } from '@/hooks/use-transactions';
 import { auth, db } from '@/lib/firebase';
 import { Debt, Repayment, Transaction, UserProfile } from '@/types/models';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { collection, deleteDoc, doc, getDoc, onSnapshot, query, where } from 'firebase/firestore';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -167,55 +168,15 @@ export default function Dashboard() {
         });
     }, []);
 
-    const chartSeries = useMemo(() => {
-        const incomeSeries: number[] = [];
-        const expenseSeries: number[] = [];
-        const owedSeries: number[] = [];
-        const owingSeries: number[] = [];
-
-        monthBuckets.forEach((bucket) => {
-            const income = transactions
-                .filter((t) => t.type === 'income')
-                .filter((t) => {
-                    const dt = new Date(t.date);
-                    return dt.getFullYear() === bucket.year && dt.getMonth() === bucket.month;
-                })
-                .reduce((s, t) => s + Number(t.amount || 0), 0);
-
-            const expense = transactions
-                .filter((t) => t.type === 'expense')
-                .filter((t) => {
-                    const dt = new Date(t.date);
-                    return dt.getFullYear() === bucket.year && dt.getMonth() === bucket.month;
-                })
-                .reduce((s, t) => s + Number(t.amount || 0), 0);
-
-            const owed = debts
-                .filter((d) => d.direction === 'owed')
-                .filter((d) => {
-                    const raw = d.dueDate || d.createdAt;
-                    const dt = raw ? new Date(raw) : new Date();
-                    return dt.getFullYear() === bucket.year && dt.getMonth() === bucket.month;
-                })
-                .reduce((s, d) => s + Number(d.amount || 0), 0);
-
-            const owing = debts
-                .filter((d) => d.direction === 'owing')
-                .filter((d) => {
-                    const raw = d.dueDate || d.createdAt;
-                    const dt = raw ? new Date(raw) : new Date();
-                    return dt.getFullYear() === bucket.year && dt.getMonth() === bucket.month;
-                })
-                .reduce((s, d) => s + Number(d.amount || 0), 0);
-
-            incomeSeries.push(income / 100);
-            expenseSeries.push(expense / 100);
-            owedSeries.push(owed);
-            owingSeries.push(owing);
-        });
-
-        return { labels: monthBuckets.map((m) => m.label), incomeSeries, expenseSeries, owedSeries, owingSeries };
-    }, [debts, monthBuckets, transactions]);
+    const analyticsData = useMemo(() => {
+        // Colors aligned with SummaryCard rows
+        return [
+            { label: 'Income', value: Number(aggregates.income || 0), color: C.PRIMARY_PURPLE },
+            { label: 'Expenses', value: Number(aggregates.expense || 0), color: C.ACCENT_BLUE },
+            { label: 'Owed to you', value: Number(debtSummary.owed || 0), color: '#10B981' },
+            { label: 'You owe', value: Number(debtSummary.owing || 0), color: '#F97316' },
+        ];
+    }, [aggregates.income, aggregates.expense, debtSummary.owed, debtSummary.owing]);
 
     const findDebtName = (t: Transaction) => {
         if (t.counterpartyName) return t.counterpartyName;
@@ -252,7 +213,7 @@ export default function Dashboard() {
                 ) : (
                     <Animated.View style={[styles.summaryRow, { opacity: cardsAnim }] }>
                         <SummaryCard title="Total Income" amount={aggregates.income} subtitle="This month" />
-                        <SummaryCard title="Expenses" amount={aggregates.expense} subtitle="This month" color={C.PRIMARY_PURPLE_DARK} />
+                        <SummaryCard title="Expenses" amount={aggregates.expense} subtitle="This month" color={C.ACCENT_BLUE} />
                     </Animated.View>
                 )}
 
@@ -272,20 +233,21 @@ export default function Dashboard() {
                     {loading ? (
                         <Shimmer height={220} borderRadius={16} />
                     ) : (
-                        <IncomeExpenseChart
-                            labels={chartSeries.labels}
-                            incomeSeries={chartSeries.incomeSeries}
-                            expenseSeries={chartSeries.expenseSeries}
-                            owedSeries={chartSeries.owedSeries}
-                            owingSeries={chartSeries.owingSeries}
-                        />
+                        <SummaryPieChart data={analyticsData} />
                     )}
                 </View>
 
                 <View style={{ height: 24 }} />
 
                 <View style={styles.recentContainer}>
-                    <Text style={styles.sectionTitle}>Recent transactions</Text>
+                    <View style={styles.sectionHeader}>
+                        <Text style={styles.sectionTitle}>Recent transactions</Text>
+                        {!loading && transactions.length > 0 && (
+                            <Pressable onPress={() => router.push('/transactions')} hitSlop={8}>
+                                <Text style={styles.linkText}>Show all →</Text>
+                            </Pressable>
+                        )}
+                    </View>
                     {loading ? (
                         <View>
                             {[0,1,2,3].map((i) => (
@@ -297,7 +259,7 @@ export default function Dashboard() {
                             <Text style={styles.emptyText}>No transactions yet — add your first expense or income.</Text>
                         </View>
                     ) : (
-                        transactions.slice(0, 6).map((t, index) => (
+                        transactions.slice(0, 4).map((t, index) => (
                             <Swipeable
                                 key={t.id}
                                 renderRightActions={() => (
@@ -348,6 +310,9 @@ export default function Dashboard() {
 
             </ScrollView>
 
+            <Pressable style={styles.aiFab} accessibilityLabel="See recommendations" onPress={() => router.push('/recommendations')}>
+                <MaterialCommunityIcons name="robot-happy-outline" size={22} color={C.TEXT_ON_PURPLE} />
+            </Pressable>
             <Pressable style={styles.fab} accessibilityLabel="Add transaction" onPress={() => router.push('/transactions/add')}>
                 <Text style={{ color: C.TEXT_ON_PURPLE, fontSize: 28, fontWeight: '900' }}>+</Text>
             </Pressable>
@@ -404,6 +369,17 @@ const styles = StyleSheet.create({
         color: C.TEXT_PRIMARY,
         fontWeight: '800',
         marginBottom: 12
+    },
+    sectionHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 12
+    },
+    linkText: {
+        color: C.PRIMARY_PURPLE,
+        fontWeight: '800',
+        fontSize: 13
     },
     emptyBox: {
         padding: 18,
@@ -490,5 +466,21 @@ const styles = StyleSheet.create({
         shadowRadius: 16,
         shadowOffset: { width: 0, height: 10 },
         elevation: 14,
+    },
+    aiFab: {
+        position: 'absolute',
+        right: 25,
+        bottom: 200,
+        backgroundColor: '#0EA5E9',
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: '#0EA5E9',
+        shadowOpacity: 0.2,
+        shadowRadius: 10,
+        shadowOffset: { width: 0, height: 8 },
+        elevation: 10
     },
 });

@@ -1,10 +1,10 @@
 // Online image URLs for illustrations, icons, and onboarding
 // Keep these lightweight and cache-friendly
 
-export const ONBOARDING_1 = 'https://images.unsplash.com/photo-1553729459-efe14ef6055d?q=80&w=1200&auto=format&fit=crop'; // finance concept
-export const ONBOARDING_2 = 'https://images.unsplash.com/photo-1556741533-f6acd6477e9a?q=80&w=1200&auto=format&fit=crop'; // budgeting
-export const ONBOARDING_3 = 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=1200&auto=format&fit=crop'; // collaboration
-export const ONBOARDING_4 = 'https://images.unsplash.com/photo-1518779578993-ec3579fee39f?q=80&w=1200&auto=format&fit=crop'; // analytics
+export const ONBOARDING_1 = 'https://i.ibb.co/fYkXRmvH/onboarding-1.png'; // finance concept
+export const ONBOARDING_2 = 'https://i.ibb.co/jkVs70gq/onboarding-2.png'; // budgeting
+export const ONBOARDING_3 = 'https://i.ibb.co/ZvHzvdc/onboarding-1.png'; // collaboration
+export const ONBOARDING_4 = 'https://i.ibb.co/DHnjV1P9/onboarding-4.png'; // analytics
 
 export const ICON_LOGO = 'https://cdn-icons-png.flaticon.com/512/1170/1170678.png';
 export const ICON_WALLET = 'https://cdn-icons-png.flaticon.com/512/1041/1041883.png';
